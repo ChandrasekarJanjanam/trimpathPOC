@@ -1,0 +1,78 @@
+ <html>
+    <head>
+		<script type="text/javascript" src="jquery.js"></script>
+		<script language="javascript" src="template.js"></script>		  
+    </head>	
+	<body bgcolor="#fff">
+		<div id="messagesTemplateData"></div>
+		<div id="firstTemplateData"></div>  
+		<script language="javascript">		
+			function loadTemplates () {			
+				templateControllerObj = new TemplateController();
+				templateControllerObj.initialize();			
+				$.ajax({ url: "data2.json",	
+					dataType: "json",	
+					type: "GET",	
+					async : false,
+					success : function(resp){
+						var messagesTemplate = templateControllerObj.process(templateControllerObj.MessagesTemplate, resp);
+						$("#messagesTemplateData").html(messagesTemplate);				
+						var firstTemplate = templateControllerObj.process(templateControllerObj.FirstTemplate, resp);
+						//alert(firstTemplate);
+						$("#firstTemplateData").html(firstTemplate);					
+					},
+					error : function(resp){
+						//handle error
+					}
+				});			
+				/*$.getJSON("data2.json", function(resp) {
+					//alert('hello'+resp.customer.first);
+					var firstTemplate = templateControllerObj.process(templateControllerObj.FirstTemplate, resp);					
+						//var firstTemplate = TrimPath.processDOMTemplate("firstTemplate", resp);
+						//alert(firstTemplate);
+						$("#firstTemplateData").html(firstTemplate);
+					
+					var messagesTemplate = templateControllerObj.process(templateControllerObj.MessagesTemplate, resp);
+						//alert(messagesTemplate);
+						$("#messagesTemplateData").html(messagesTemplate);	
+						
+				});*/
+
+			}
+			
+			TemplateController	=	function(){
+				var  handle					=	"";	
+				this.FirstTemplate			=   "firstTemplate";
+				this.SecondTemplate			=   "secondTemplate";
+				this.MessagesTemplate       =   "messagesTemplate";
+				tempCont	=	this;
+				this.initialize	=	function(){
+					var frameName = "SampleTemplates";
+					handle = document.getElementById(frameName).contentWindow;				
+				}
+				this.process	=	function(templateName, data){
+					try{
+						var textData = handle.document.getElementById(templateName).innerHTML;
+						//alert('textData---'+textData)
+						textData = textData.replace(/&gt;/gi, ">").replace(/&lt;/gi, "<").replace(/&amp;/gi, "&");
+						var templateObj = TrimPath.parseTemplate(textData);
+						var templateCode = templateObj.process(data, {
+							throwExceptions: true
+						});
+						//alert('templateCode---'+templateCode)
+						return templateCode;
+					}catch(Exception){
+						 console.log("Exception--line number--"+Exception.lineNumber+"  exep is : "+Exception.message);
+					}
+				}	
+			}
+			
+			$(document).ready(function() 
+			{		
+				loadTemplates();		
+			});
+			
+		</script>
+		<iframe src="templates.html" id="SampleTemplates" style="width: 0px; height: 0px; visibility: hidden;"></iframe>
+	</body>
+</html>
